@@ -137,6 +137,9 @@ Open **`http://127.0.0.1:5555`** in your browser to access the control panel.
 sellbird run
 ```
 
+### Warmup Your Mailbox
+For cold outreach, mailbox warmup is highly recommended using [TrulyInbox](https://trulyinbox.com/?via=sellbird) before launching mass campaigns.
+
 ---
 
 ## 🌐 Self-Hosting on Linux VPS (24/7 Deployment)
