@@ -64,7 +64,7 @@ flowchart LR
 ### 1. Clone & Setup Virtual Environment
 
 ```bash
-git clone https://github.com/Soumik22-tech/sellbird-openai-compatible-api-version.git sellbird
+git clone https://github.com/Soumik22-tech/sellbird-unleashed.git sellbird
 cd sellbird
 
 # Create and activate an isolated virtual environment
