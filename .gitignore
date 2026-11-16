@@ -62,3 +62,10 @@ harvey.yaml.*
 # Selfhost private guide
 selfhost-guide.txt
 selfhost.txt
+
+# Local personal scripts and guides
+setupguide.txt
+selfhost-guide.txt
+selfhost.txt
+*.bat
+sellbird.local.yaml
