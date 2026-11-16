@@ -58,3 +58,7 @@ sellbird.yaml.*
 harvey.local.yaml
 harvey.local.yaml.*
 harvey.yaml.*
+
+# Selfhost private guide
+selfhost-guide.txt
+selfhost.txt
