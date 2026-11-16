@@ -26,14 +26,14 @@ class ApiBrainClient:
         elif self.provider == "nvidia":
             api_key = os.getenv("NVIDIA_API_KEY", "").strip()
             base_url = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1").strip()
-            model = self.custom_model or os.getenv("NVIDIA_MODEL", "meta/llama-3.3-70b-instruct").strip()
+            model = self.custom_model or os.getenv("NVIDIA_MODEL", "deepseek-ai/deepseek-r1").strip()
             return base_url, api_key, model
 
         elif self.provider == "gemini":
             api_key = os.getenv("GEMINI_API_KEY", "").strip()
             # Google AI Studio OpenAI-compatible endpoint
             base_url = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/").strip()
-            model = self.custom_model or os.getenv("GEMINI_MODEL", "gemini-2.0-flash").strip()
+            model = self.custom_model or os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip()
             return base_url, api_key, model
 
         elif self.provider == "custom":

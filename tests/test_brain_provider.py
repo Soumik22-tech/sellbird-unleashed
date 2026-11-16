@@ -68,7 +68,7 @@ def test_load_brain_config(tmp_path):
     assert load_brain_config(str(path)).provider == "claude"  # no section
     path.write_text(yaml.dump({"brain": {"provider": "codex", "model": "gpt-5.5"}}))
     assert load_brain_config(str(path)) == BrainConfig(provider="codex", model="gpt-5.5")
-    path.write_text(yaml.dump({"brain": {"provider": "gemini"}}))
+    path.write_text(yaml.dump({"brain": {"provider": "unsupported_xyz"}}))
     with pytest.raises(ConfigError):  # never silently becomes Claude
         load_brain_config(str(path))
 
