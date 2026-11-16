@@ -40,7 +40,14 @@ _NON_RETRYABLE_PATTERNS = (
 )
 
 
-PROVIDER_LABELS = {"claude": "Claude", "codex": "Codex"}
+PROVIDER_LABELS = {
+    "claude": "Claude",
+    "codex": "Codex",
+    "groq": "Groq",
+    "nvidia": "NVIDIA NIM",
+    "gemini": "Google Gemini",
+    "custom": "Custom OpenAI API",
+}
 
 # Settings key holding the brain's last health transition, for `sellbird
 # status` and the dashboard: {"provider", "status": "ok"|"paused", "reason",
@@ -130,6 +137,11 @@ class Brain:
                 model=self.model, reasoning_effort=self.config.reasoning_effort
             )
             self.quota = CodexQuotaClient(self.codex)
+        elif self.provider in ("groq", "nvidia", "gemini", "custom"):
+            from sellbird.api_client import ApiBrainClient
+            self.api_client = ApiBrainClient(provider=self.provider, model=self.model)
+            from sellbird.integrations.quota import QuotaClient
+            self.quota = QuotaClient()
         else:
             # Lazy import avoids a cycle (quota -> usage -> state).
             from sellbird.integrations.quota import QuotaClient
@@ -153,19 +165,15 @@ class Brain:
         return ""
 
     async def preflight(self) -> str:
-        """Can this Brain be used right now? Returns "" or the reason not.
+        """Can this Brain be used right now? Returns "" or the reason not."""
+        if self.provider in ("groq", "nvidia", "gemini", "custom"):
+            err = self.api_client.preflight_check()
+            if err:
+                self.unavailable = err
+                return err
+            self.unavailable = ""
+            return ""
 
-        Codex only (Claude keeps its existing behaviour): runs the adapter's
-        full pre-prompt check (CodexClient.preflight): CLI version, route and
-        lockdown attested with no login in the runtime, the native login read
-        only (expiry, renewal), then with the access-only copy the configured
-        model against the catalog, the ChatGPT account, and a started
-        tool-less thread. No turn, so no inference; nothing is written to the
-        native login. While paused, the check is repeated only when the login
-        file or the Codex executable changes, or every
-        PROVIDER_RECHECK_SECONDS, so a persistent problem doesn't start
-        runtimes every heartbeat.
-        """
         if self.provider != "codex":
             return await self._claude_preflight()
         from sellbird.codex import CodexError
@@ -294,6 +302,11 @@ class Brain:
         if self.transport is not None:
             return await self._think_transport(prompt, expect_json=expect_json,
                                                timeout=timeout, agent=agent, task=task)
+        if self.provider in ("groq", "nvidia", "gemini", "custom"):
+            return await self._think_api(
+                prompt, expect_json=expect_json, timeout=timeout,
+                max_retries=max_retries, agent=agent, task=task
+            )
         if self.provider == "codex":
             return await self._think_codex(
                 prompt, session_id=session_id, timeout=timeout,
@@ -439,6 +452,71 @@ class Brain:
         logger.error(
             f"Brain call failed after {max_retries + 1} attempts. "
             f"Last error: {str(last_error)[:200]}"
+        )
+        return ""
+
+    async def _think_api(
+        self,
+        prompt: str,
+        expect_json: bool,
+        timeout: float,
+        max_retries: int,
+        agent: str,
+        task: str,
+    ) -> str:
+        """Call external LLM API (Groq, NVIDIA NIM, Gemini, Custom)."""
+        logger.debug(f"Brain call via {self.provider_label}")
+        last_error = ""
+        for attempt in range(max_retries + 1):
+            if attempt > 0:
+                delay = RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                logger.info(
+                    f"Retrying {self.provider_label} call in {delay:.0f}s "
+                    f"(attempt {attempt + 1}/{max_retries + 1})..."
+                )
+                await asyncio.sleep(delay)
+            try:
+                start_t = time.time()
+                result = await self.api_client.generate(prompt, timeout=timeout, expect_json=expect_json)
+                duration_ms = int((time.time() - start_t) * 1000)
+                if not result:
+                    last_error = "Empty response or API failure"
+                    continue
+
+                try:
+                    await self.state.increment_usage(provider=self.provider)
+                except Exception as e:
+                    logger.warning(f"Failed to record usage counter: {e}")
+
+                try:
+                    _, _, model_name = self.api_client.get_config()
+                    await self.state.record_usage_event(
+                        agent=agent,
+                        task=task,
+                        session_id="",
+                        model=model_name,
+                        duration_ms=duration_ms,
+                        num_turns=1,
+                        source=f"{self.provider}_api",
+                        provider=self.provider,
+                        input_tokens=0,
+                        output_tokens=0,
+                        cache_read_tokens=0,
+                        cache_creation_tokens=0,
+                        cost_usd=0.0,
+                    )
+                except Exception as e:
+                    logger.warning(f"Failed to record usage event: {e}")
+
+                return result
+            except Exception as e:
+                logger.error(f"{self.provider_label} API call exception: {e}")
+                last_error = str(e)
+                continue
+
+        logger.error(
+            f"{self.provider_label} call failed after {max_retries + 1} attempts. "
+            f"Last error: {last_error[:200]}"
         )
         return ""
 

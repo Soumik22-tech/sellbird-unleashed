@@ -1151,7 +1151,7 @@ def main():
         help="Max pages to crawl (default: 100)",
     )
     sub.add_argument(
-        "--provider", choices=["claude", "codex"], default=None,
+        "--provider", choices=["claude", "codex", "groq", "nvidia", "gemini", "custom"], default=None,
         help="Subscription to think with (default: the one in your config, else claude)",
     )
     sub.add_argument("--model", default=None, help="Model for this provider (default: provider default)")

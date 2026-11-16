@@ -1,0 +1,126 @@
+================================================================================
+                    SELLBIRD COMPLETE MASTER SETUP GUIDE
+                    (100% Efficiency via Dashboard UI)
+================================================================================
+
+This guide covers all 7 setup checkpoints shown in your Sellbird Dashboard 
+("Finish setting up Sellbird" checklist). Follow each step to get your green 
+checkmarks directly through the Web UI and simple inputs!
+
+================================================================================
+CHECKPOINT 1: Python virtual environment
+================================================================================
+Status: ALREADY COMPLETED & READY!
+- We already created C:\sellbird\venv and installed all dependencies in isolation.
+- Whenever you open `start_dashboard.bat`, this virtual environment is automatically 
+  activated in the background.
+
+================================================================================
+CHECKPOINT 2: Environment file (.env)
+================================================================================
+Status: ALREADY CREATED!
+- File location: C:\sellbird\.env
+- Make sure you enter your AI Brain API Key inside this file (Groq or Gemini or NVIDIA).
+
+  For Groq (Fastest & Free):
+  1. Open: https://console.groq.com/keys
+  2. Create an API key (starts with gsk_...).
+  3. In C:\sellbird\.env set:
+     GROQ_API_KEY=gsk_your_key_here
+
+================================================================================
+CHECKPOINT 3: Email provider configured (SMTP + IMAP or Microsoft / Gmail)
+================================================================================
+How to set it directly in the Dashboard Settings tab:
+
+Recommended Option: Any Gmail or SMTP Mailbox (Fastest to test)
+1. Go to your Google Account: https://myaccount.google.com/security
+2. Enable 2-Step Verification if not active.
+3. Open: https://myaccount.google.com/apppasswords
+4. Enter app name "Sellbird" and click Create.
+5. Copy the 16-letter App Password (e.g. `abcd efgh ijkl mnop`).
+6. Now, on your Sellbird Dashboard (http://127.0.0.1:5555):
+   - Scroll to "SMTP + IMAP mailbox" section (shown in your screenshot):
+     * SMTP host: smtp.gmail.com
+     * Port: 587
+     * Username: your_email@gmail.com
+     * Password: your_16_letter_app_password (without spaces)
+   - Click "Save SMTP".
+
+Alternative Option: Microsoft 365 / Outlook
+If using Microsoft Exchange/Outlook:
+1. Go to: https://entra.microsoft.com
+2. Navigate to: Applications -> App registrations -> New registration.
+3. Name it "Sellbird", select "Accounts in this organizational directory only".
+4. In Redirect URI, select "Public client/native" and set URL to:
+   http://localhost:8766
+5. Click Register. Copy the "Application (client) ID" and "Directory (tenant) ID".
+6. On your Sellbird Dashboard, paste them under "Microsoft 365 / Outlook" and click "Save Microsoft 365".
+
+================================================================================
+CHECKPOINT 4: Email verification key (Reoon, ZeroBounce, or Hunter)
+================================================================================
+Why needed: Without an email verifier, discovered prospect emails remain as 
+'guess' and Sellbird's safety engine prevents sending to them.
+
+Best Free Option: Reoon (Provides 600 Free Verifications every month!)
+1. Go to: https://www.reoon.com/email-verifier/
+2. Sign up for a free account.
+3. In your Reoon dashboard, go to "API" -> Generate API Key.
+4. Copy the API Key.
+5. In your Sellbird Dashboard under "Email verification":
+   - Paste under "Reoon API key".
+   - Click "Save verification keys".
+
+Alternative Free Option: Hunter.io (50 Free searches/month)
+1. Go to: https://hunter.io
+2. Sign up and grab your API key from Account -> API.
+3. Paste under "Hunter API key" in Sellbird Dashboard and save.
+
+================================================================================
+CHECKPOINT 5 & 6: Sellbird Configured & Product Knowledge Trained
+================================================================================
+How to train Sellbird on YOUR website/product automatically:
+
+Sellbird features a built-in AI Web Scraper & Trainer (`sellbird train`).
+It visits your website, reads your home page, about page, pricing, and features,
+then automatically writes:
+  - `sellbird.local.yaml` (Your custom ICP, offer, pricing, objections)
+  - `skills/` (Product knowledge for the AI writer)
+
+To train in 1-Click:
+1. Double-click the file: `C:\sellbird\train_website.bat`
+2. It will ask: "Enter your website URL (e.g. https://yourbusiness.com):"
+3. Type or paste your website URL and press Enter!
+4. The AI will scrape the site, extract your product details, create objection 
+   responses, and save everything.
+5. Refresh your Sellbird Dashboard, and both "Sellbird configured" and 
+   "Product knowledge trained" checkpoints will turn GREEN!
+
+*Manual Check/Edit:*
+After training, you can open `C:\sellbird\sellbird.local.yaml` anytime to review 
+or adjust what AI learned about your company.
+
+================================================================================
+CHECKPOINT 7: Warm up your mailbox (TrulyInbox or Skip for testing)
+================================================================================
+For production/VPS deployment:
+- Cold email domains need 2-4 weeks of automated warmup to stay out of spam.
+- Service: https://trulyinbox.com (paste your API key into the dashboard).
+- For local testing on 1-2 test emails, you can test directly without waiting 
+  for warmup.
+
+================================================================================
+DAILY USAGE CHEAT SHEET (100% DASHBOARD CONTROL)
+================================================================================
+1. Launch Dashboard: Double-click `start_dashboard.bat`.
+2. Launch Heartbeat Worker: Double-click `start_worker.bat`.
+3. Open Dashboard URL: http://127.0.0.1:5555
+4. Prospecting & Drafting:
+   - AI will find target leads based on your ICP.
+   - AI drafts customized personalized emails based on what it learned in Step 5.
+   - Emails appear in the "Outbox" tab on your Dashboard.
+5. You Review & Approve:
+   - Click on any email to review or edit.
+   - Click "Approve" when you are happy with it. Nothing is sent without your approval!
+================================================================================
